@@ -53,6 +53,12 @@ Socket Mode를 켜고 App-Level Token을 발급합니다. App-Level Token에는 
 connections:write
 ```
 
+### App Home
+
+봇과의 1:1 DM에서 테스트하려면 App Home의 Messages Tab을 켜고
+`Allow users to send Slash commands and messages from the messages tab` 옵션을 활성화합니다.
+이 옵션이 꺼져 있으면 Slack에서 "이 앱으로 메시지를 보내는 기능이 꺼져 있습니다."라고 표시됩니다.
+
 ## 환경변수
 
 `.env.example`을 참고해 `.env` 파일을 만듭니다.
