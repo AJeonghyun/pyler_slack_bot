@@ -27,7 +27,11 @@ chat:write
 reactions:read
 channels:history
 groups:history
+im:history
 ```
+
+개인 DM에서 테스트하거나 사용하려면 `im:history`가 필요합니다. 그룹 DM까지 지원하려면
+추가로 `mpim:history`를 넣습니다.
 
 ### Event Subscriptions
 
