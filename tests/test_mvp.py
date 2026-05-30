@@ -7,13 +7,33 @@ import tempfile
 import unittest
 
 from db import VoteDatabase
-from slack_blocks import build_vote_blocks, build_vote_fallback_text, format_close_summary
+from slack_blocks import (
+    build_close_summary_blocks,
+    build_vote_blocks,
+    build_vote_fallback_text,
+    format_close_summary,
+)
+
+
+def _all_text(blocks: list[dict]) -> str:
+    parts: list[str] = []
+    for block in blocks:
+        if isinstance(block.get("text"), dict):
+            parts.append(block["text"].get("text", ""))
+        for field in block.get("fields", []):
+            parts.append(field.get("text", ""))
+        for element in block.get("elements", []):
+            if isinstance(element, dict):
+                text = element.get("text", "")
+                parts.append(text if isinstance(text, str) else text.get("text", ""))
+    return "\n".join(parts)
 
 
 class FakeSlackClient:
     def __init__(self) -> None:
         self.posts: list[dict] = []
         self.updates: list[dict] = []
+        self.ephemerals: list[dict] = []
 
     def chat_postMessage(self, **kwargs: dict) -> dict[str, str]:
         self.posts.append(kwargs)
@@ -21,6 +41,10 @@ class FakeSlackClient:
 
     def chat_update(self, **kwargs: dict) -> dict[str, bool]:
         self.updates.append(kwargs)
+        return {"ok": True}
+
+    def chat_postEphemeral(self, **kwargs: dict) -> dict[str, bool]:
+        self.ephemerals.append(kwargs)
         return {"ok": True}
 
 
@@ -43,6 +67,12 @@ class VoteDatabaseTest(unittest.TestCase):
         self.assertTrue(created)
         self.assertFalse(duplicate_created)
         self.assertEqual(case["case_id"], duplicate["case_id"])
+        self.assertEqual(case["status"], "categorizing")
+
+        case = self.db.set_category(case["case_id"], "선정")
+        self.assertIsNotNone(case)
+        self.assertEqual(case["status"], "voting")
+        self.assertEqual(case["category"], "선정")
 
         self.db.set_vote_message_ts(case["case_id"], "124.000")
         self.db.upsert_vote(case["case_id"], "U1", 3)
@@ -67,6 +97,28 @@ class VoteDatabaseTest(unittest.TestCase):
         self.assertTrue(all(block.get("type") != "actions" for block in blocks))
         self.assertIn("CASE-", build_vote_fallback_text(closed_case, stats))
         self.assertIn("투표가 마감되었습니다.", format_close_summary(stats))
+
+    def test_stats_track_who_voted_which_score(self) -> None:
+        case, _ = self.db.create_case_if_absent("C2", "200.000", "U1")
+        case_id = case["case_id"]
+        self.db.upsert_vote(case_id, "U1", 4)
+        self.db.upsert_vote(case_id, "U2", 4)
+        self.db.upsert_vote(case_id, "U3", 2)
+        self.db.upsert_vote(case_id, "U1", 5)  # revote moves U1 from 4 -> 5
+
+        stats = self.db.get_vote_stats(case_id)
+        self.assertEqual(stats["votes_by_score"][5], ["U1"])
+        self.assertEqual(stats["votes_by_score"][4], ["U2"])
+        self.assertEqual(stats["votes_by_score"][2], ["U3"])
+
+        voting_text = _all_text(build_vote_blocks(case, stats))
+        self.assertIn("<@U1>", voting_text)
+        self.assertIn("<@U2>", voting_text)
+        self.assertIn("<@U3>", voting_text)
+
+        close_text = _all_text(build_close_summary_blocks(stats))
+        self.assertIn("<@U1>", close_text)
+        self.assertIn("투표가 마감되었습니다.", close_text)
 
 
 class SlackHandlerTest(unittest.TestCase):
@@ -94,16 +146,37 @@ class SlackHandlerTest(unittest.TestCase):
         event = {
             "reaction": "vote",
             "user": "U1",
+            "item_user": "U1",
             "item": {"channel": "C1", "ts": "123.456"},
         }
         self.app_module.handle_reaction_added(event, self.client)
         self.app_module.handle_reaction_added(event, self.client)
 
         self.assertEqual(len(self.client.posts), 1)
+        self.assertIn("카테고리 선택", self.client.posts[0]["text"])
 
         case = self.app_module.db.create_case_if_absent("C1", "123.456", "U1")[0]
         case_id = case["case_id"]
         acks: list[str] = []
+
+        self.app_module.handle_vote_score(
+            lambda: acks.append("ignored_vote"),
+            {"user": {"id": "U2"}},
+            {"value": json.dumps({"case_id": case_id, "score": 3})},
+            self.client,
+        )
+        self.assertEqual(self.app_module.db.get_vote_stats(case_id)["total_voters"], 0)
+
+        self.app_module.handle_select_category(
+            lambda: acks.append("category"),
+            {"user": {"id": "U1"}},
+            {"value": json.dumps({"case_id": case_id, "category": "선정"})},
+            self.client,
+        )
+        case = self.app_module.db.get_case(case_id)
+        self.assertEqual(case["status"], "voting")
+        self.assertEqual(case["category"], "선정")
+        self.assertIn("카테고리: *선정*", _all_text(self.client.updates[-1]["blocks"]))
 
         self.app_module.handle_vote_score(
             lambda: acks.append("vote"),
@@ -119,10 +192,10 @@ class SlackHandlerTest(unittest.TestCase):
         )
 
         stats = self.app_module.db.get_vote_stats(case_id)
-        self.assertEqual(acks, ["vote", "revote"])
+        self.assertEqual(acks, ["ignored_vote", "category", "vote", "revote"])
         self.assertEqual(stats["counts"][5], 1)
         self.assertEqual(stats["total_voters"], 1)
-        self.assertEqual(len(self.client.updates), 2)
+        self.assertEqual(len(self.client.updates), 3)
 
         self.app_module.handle_close_vote(
             lambda: acks.append("close"),

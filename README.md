@@ -1,6 +1,6 @@
 # Labeling Vote Bot
 
-Python 기반 Slack Bot으로, 스크린샷이 올라온 메시지에 `:vote:` reaction이 달리면 같은 thread에 Labeling Review 투표 카드를 생성합니다. 팀원은 0점부터 5점까지 버튼으로 투표하고, 같은 thread에서 자유롭게 의견을 남길 수 있습니다.
+Python 기반 Slack Bot으로, 스크린샷이 올라온 메시지에 `:ballot_box_with_ballot:` reaction이 달리면 같은 thread에 Labeling Review 투표 카드를 생성합니다. 팀원은 0점부터 5점까지 버튼으로 투표하고, 같은 thread에서 자유롭게 의견을 남길 수 있습니다.
 
 이번 MVP에는 AI 요약, Notion 연동, OCR, 이미지 분석, 유사 케이스 검색, 관리자 웹페이지, PostgreSQL, FastAPI를 포함하지 않습니다.
 
@@ -8,7 +8,7 @@ Python 기반 Slack Bot으로, 스크린샷이 올라온 메시지에 `:vote:` r
 
 - Slack Socket Mode 기반 실행
 - `reaction_added` 이벤트 감지
-- `:vote:` reaction 기준 투표 case 생성
+- `:ballot_box_with_ballot:` reaction 기준 투표 case 생성
 - 같은 `channel_id + root_ts`에 대해 투표 카드 중복 생성 방지
 - 0점부터 5점까지 Block Kit 버튼 투표
 - 사용자별 1개 투표 저장 및 재투표 시 수정
@@ -68,7 +68,7 @@ SLACK_BOT_TOKEN=xoxb-...
 SLACK_APP_TOKEN=xapp-...
 SLACK_SIGNING_SECRET=...
 DB_PATH=./labeling_vote_bot.db
-VOTE_TRIGGER_REACTION=vote
+VOTE_TRIGGER_REACTION=ballot_box_with_ballot
 ```
 
 토큰 값은 코드에 넣지 말고 환경변수로만 설정합니다.
@@ -100,7 +100,7 @@ python -m unittest tests.test_mvp
 
 ```text
 1. 스크린샷 메시지를 Slack 채널에 업로드한다.
-2. 해당 메시지에 :vote: 이모지를 단다.
+2. 해당 메시지에 :ballot_box_with_ballot: 이모지를 단다.
 3. Bot이 thread에 투표 카드를 생성한다.
 4. 팀원들이 0~5점 버튼으로 투표한다.
 5. 의견은 같은 thread 댓글로 토론한다.

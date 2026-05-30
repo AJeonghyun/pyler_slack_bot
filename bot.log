@@ -1,0 +1,160 @@
+2026-05-30 15:59:17,757 INFO __main__ Bot user id: U0B7ZMSL6M6
+2026-05-30 15:59:17,758 INFO __main__ Starting Labeling Vote Bot with trigger reaction :white_check_mark:
+2026-05-30 15:59:18,789 INFO slack_bolt.App A new session has been established (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 15:59:18,789 INFO slack_bolt.App ⚡️ Bolt app is running!
+2026-05-30 15:59:18,793 INFO slack_bolt.App Starting to receive messages from a new connection (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:00:17,870 ERROR slack_bolt.App on_error invoked (session id: 140e5521-f57a-4362-aea5-84f136d2f197, error: TimeoutError, message: [Errno 60] Operation timed out)
+2026-05-30 16:00:17,871 INFO slack_bolt.App The connection has been closed (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:00:17,876 INFO slack_bolt.App Stopped receiving messages from a connection (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:00:18,819 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:00:18,820 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 16:00:18,837 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:00:19,458 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 16:00:19,468 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:00:19,468 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 140e5521-f57a-4362-aea5-84f136d2f197, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 16:00:29,473 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:00:29,474 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 16:00:29,488 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:00:30,457 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 16:00:30,472 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:00:30,472 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 140e5521-f57a-4362-aea5-84f136d2f197, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 16:33:31,736 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:33:31,738 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 16:33:31,752 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:33:32,370 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 16:33:32,378 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:33:32,378 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 140e5521-f57a-4362-aea5-84f136d2f197, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 16:33:42,384 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:33:42,385 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 16:33:42,395 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:33:42,988 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 16:33:43,002 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:33:43,002 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 140e5521-f57a-4362-aea5-84f136d2f197, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 16:33:53,006 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:33:53,006 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 16:33:53,015 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:33:53,698 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 16:33:53,714 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:33:53,714 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 140e5521-f57a-4362-aea5-84f136d2f197, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 16:34:03,720 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:34:03,720 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 16:34:03,729 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:34:04,335 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 16:34:04,349 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:34:04,349 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 140e5521-f57a-4362-aea5-84f136d2f197, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 16:34:14,355 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:34:14,355 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 16:34:14,370 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:34:14,906 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 16:34:14,920 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 16:34:14,920 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 140e5521-f57a-4362-aea5-84f136d2f197, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 16:34:24,924 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:34:24,924 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 16:35:02,943 INFO slack_bolt.App The connection has been closed (session id: 140e5521-f57a-4362-aea5-84f136d2f197)
+2026-05-30 16:35:02,944 INFO slack_bolt.App A new session has been established (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 16:35:02,944 INFO slack_bolt.App Connected to a new endpoint...
+2026-05-30 16:35:03,028 INFO slack_bolt.App Starting to receive messages from a new connection (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 17:36:53,168 INFO slack_bolt.App The connection seems to be stale. Disconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, reason: disconnected for 3640+ seconds)
+2026-05-30 17:36:55,432 INFO slack_bolt.App The connection has been closed (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 17:36:55,433 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 17:36:55,433 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 17:36:55,447 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 17:36:56,412 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 17:36:56,435 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 17:36:56,435 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 17:40:48,740 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 17:40:48,740 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 17:40:48,755 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 17:40:50,041 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 17:40:50,058 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 17:40:50,058 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 17:41:05,361 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 17:41:05,362 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 17:41:05,378 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 17:41:06,224 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 17:41:06,240 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 17:41:06,240 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 17:41:27,136 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 17:41:27,136 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 17:41:27,147 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 17:41:28,250 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 17:41:28,265 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 17:41:28,265 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 17:41:43,565 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 17:41:43,566 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 17:41:43,580 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 17:41:44,417 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 17:41:44,435 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 17:41:44,435 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 18:37:10,790 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 18:37:10,790 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 18:37:10,802 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 18:37:12,145 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 18:37:12,159 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 18:37:12,159 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 18:52:20,030 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 18:52:20,031 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 18:52:20,045 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 19:38:09,839 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 19:38:09,851 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 19:38:09,851 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 20:39:11,936 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 20:39:11,936 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 20:39:11,951 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 20:39:13,112 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 20:39:13,128 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 20:39:13,128 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 21:40:15,646 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 21:40:15,647 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 21:40:15,662 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 21:40:16,728 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 21:40:16,743 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 21:40:16,743 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-30 23:42:11,042 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-30 23:42:11,042 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-30 23:42:11,049 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 23:42:11,791 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-30 23:42:11,802 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-30 23:42:11,802 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-31 00:43:10,152 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-31 00:43:10,153 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-31 00:43:10,163 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-31 00:43:11,462 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-31 00:43:11,495 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-31 00:43:11,496 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-31 00:43:21,506 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-31 00:43:21,507 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-31 00:43:21,520 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-31 00:43:22,228 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-31 00:43:22,246 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-31 00:43:22,246 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-31 00:55:55,104 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-31 00:55:55,106 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-31 00:55:55,120 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-31 00:55:56,068 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-31 00:55:56,085 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-31 00:55:56,085 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-31 00:56:56,224 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-31 00:56:56,224 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-31 00:56:56,243 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-31 00:56:56,966 INFO slack_bolt.App Going to retry the same request: POST https://slack.com/api/apps.connections.open
+2026-05-31 00:56:56,978 ERROR slack_bolt.App Failed to send a request to Slack API server: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-05-31 00:56:56,978 ERROR slack_bolt.App Failed to check the current session or reconnect to the server (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b, error: URLError, message: <urlopen error [Errno 8] nodename nor servname provided, or not known>)
+2026-05-31 00:57:06,979 INFO slack_bolt.App The session seems to be already closed. Reconnecting... (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-31 00:57:06,979 INFO slack_bolt.App Connecting to a new endpoint...
+2026-05-31 00:57:08,306 INFO slack_bolt.App The connection has been closed (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-31 00:57:08,306 INFO slack_bolt.App A new session has been established (session id: ee06f5a2-3152-4acb-8049-5fa53cb23a9a)
+2026-05-31 00:57:08,306 INFO slack_bolt.App Connected to a new endpoint...
+2026-05-31 00:57:08,452 INFO slack_bolt.App Stopped receiving messages from a connection (session id: 64b28ffa-6c95-4b53-81fd-7717809e855b)
+2026-05-31 00:57:08,553 INFO slack_bolt.App Starting to receive messages from a new connection (session id: ee06f5a2-3152-4acb-8049-5fa53cb23a9a)
+2026-05-31 00:57:58,119 INFO __main__ Closed vote case_id=CASE-20260530-0002 by user_id=U09MH9E2AG5
+2026-05-31 00:59:25,256 INFO __main__ Created vote case CASE-20260530-0003 in channel D0B6Q065BK9
+2026-05-31 00:59:30,469 INFO __main__ Recorded vote case_id=CASE-20260530-0003 user_id=U09MH9E2AG5 score=0
+2026-05-31 00:59:34,132 INFO __main__ Recorded vote case_id=CASE-20260530-0003 user_id=U09MH9E2AG5 score=0
+2026-05-31 00:59:36,003 INFO __main__ Recorded vote case_id=CASE-20260530-0003 user_id=U09MH9E2AG5 score=1
+2026-05-31 00:59:37,915 INFO __main__ Recorded vote case_id=CASE-20260530-0003 user_id=U09MH9E2AG5 score=2
+2026-05-31 00:59:40,403 INFO __main__ Recorded vote case_id=CASE-20260530-0003 user_id=U09MH9E2AG5 score=3
+2026-05-31 00:59:42,193 INFO __main__ Recorded vote case_id=CASE-20260530-0003 user_id=U09MH9E2AG5 score=4
+2026-05-31 00:59:43,904 INFO __main__ Recorded vote case_id=CASE-20260530-0003 user_id=U09MH9E2AG5 score=5
+2026-05-31 00:59:45,419 INFO __main__ Recorded vote case_id=CASE-20260530-0003 user_id=U09MH9E2AG5 score=0
+2026-05-31 01:21:48,192 INFO __main__ Closed vote case_id=CASE-20260530-0003 by user_id=U09MH9E2AG5
