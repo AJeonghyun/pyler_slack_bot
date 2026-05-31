@@ -53,6 +53,8 @@ app = App(
     token_verification_enabled=False,
 )
 BOT_USER_ID: str | None = None
+USER_PROFILE_CACHE: dict[str, dict[str, str] | None] = {}
+USERS_READ_SCOPE_WARNING_LOGGED = False
 
 
 @app.event("reaction_added")
@@ -86,6 +88,7 @@ def handle_reaction_added(event: dict[str, Any], client: Any) -> None:
             blocks = build_category_blocks(case)
         else:
             stats = db.get_vote_stats(case["case_id"])
+            stats = _enrich_stats_with_voter_profiles(client, stats)
             text = build_vote_fallback_text(case, stats)
             blocks = build_vote_blocks(case, stats)
         response = client.chat_postMessage(
@@ -250,7 +253,7 @@ def handle_close_vote(
                 logger.warning("Close action could not recover case_id=%s", case_id)
                 return
 
-        stats = db.get_vote_stats(case_id)
+        stats = _enrich_stats_with_voter_profiles(client, db.get_vote_stats(case_id))
         if newly_closed:
             _respond_ephemeral(respond, "투표 마감을 저장했습니다. 결과를 업데이트합니다.")
         _update_vote_message(client, case_id, case=case, stats=stats)
@@ -280,7 +283,7 @@ def _update_vote_message(
         logger.warning("Cannot update case_id=%s without vote_message_ts", case_id)
         return
 
-    stats = stats or db.get_vote_stats(case_id)
+    stats = _enrich_stats_with_voter_profiles(client, stats or db.get_vote_stats(case_id))
     started_at = time.perf_counter()
     client.chat_update(
         channel=case["channel_id"],
@@ -290,6 +293,68 @@ def _update_vote_message(
     )
     elapsed_ms = int((time.perf_counter() - started_at) * 1000)
     logger.info("Updated vote message case_id=%s elapsed_ms=%s", case_id, elapsed_ms)
+
+
+def _enrich_stats_with_voter_profiles(client: Any, stats: dict[str, Any]) -> dict[str, Any]:
+    votes_by_score = stats.get("votes_by_score", {})
+    user_ids = list(dict.fromkeys(user_id for voters in votes_by_score.values() for user_id in voters))
+    if not user_ids:
+        return stats
+
+    profiles: dict[str, dict[str, str]] = {}
+    for user_id in user_ids:
+        cached = USER_PROFILE_CACHE.get(user_id)
+        if cached is not None:
+            profiles[user_id] = cached
+            continue
+        if user_id in USER_PROFILE_CACHE:
+            continue
+
+        profile = _fetch_user_profile(client, user_id)
+        USER_PROFILE_CACHE[user_id] = profile
+        if profile:
+            profiles[user_id] = profile
+
+    enriched = dict(stats)
+    enriched["voter_profiles"] = profiles
+    return enriched
+
+
+def _fetch_user_profile(client: Any, user_id: str) -> dict[str, str] | None:
+    global USERS_READ_SCOPE_WARNING_LOGGED
+
+    if not hasattr(client, "users_info"):
+        return None
+
+    try:
+        response = client.users_info(user=user_id)
+    except Exception:
+        logger.exception("Failed to fetch Slack user profile user_id=%s", user_id)
+        return None
+
+    if not response.get("ok", True):
+        error = response.get("error", "unknown_error")
+        if error == "missing_scope" and not USERS_READ_SCOPE_WARNING_LOGGED:
+            USERS_READ_SCOPE_WARNING_LOGGED = True
+            logger.warning("users.info requires users:read scope to show voter avatars")
+        else:
+            logger.warning("Could not fetch Slack user profile user_id=%s error=%s", user_id, error)
+        return None
+
+    user = response.get("user") or {}
+    profile = user.get("profile") or {}
+    image_url = profile.get("image_24") or profile.get("image_32") or profile.get("image_48")
+    if not image_url:
+        return None
+
+    alt_text = (
+        profile.get("display_name")
+        or profile.get("real_name")
+        or user.get("real_name")
+        or user.get("name")
+        or user_id
+    )
+    return {"image_url": image_url, "alt_text": alt_text}
 
 
 def _post_ephemeral(client: Any, case: dict[str, Any], user_id: str, text: str) -> None:

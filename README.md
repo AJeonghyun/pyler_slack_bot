@@ -29,10 +29,13 @@ channels:history
 groups:history
 im:history
 mpim:history
+users:read
 ```
 
 개인 DM에서 테스트하거나 사용하려면 `im:history`가 필요합니다. 그룹 DM까지 지원하려면
 `mpim:history`가 필요합니다.
+투표자 프로필 이미지를 투표 결과에 표시하려면 `users:read`가 필요합니다. scope를 추가한 뒤에는
+앱을 workspace에 재설치해야 새 권한이 반영됩니다.
 
 ### Event Subscriptions
 

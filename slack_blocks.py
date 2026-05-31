@@ -6,6 +6,8 @@ from typing import Any
 SCORE_RANGE = range(6)
 DESC_SCORES = list(range(5, -1, -1))
 MAX_FIELDS_PER_SECTION = 10
+MAX_CONTEXT_ELEMENTS = 10
+MAX_CONTEXT_IMAGES = MAX_CONTEXT_ELEMENTS - 1
 SCORE_LABELS = {
     5: ("🟢", "5점"),
     4: ("🔵", "4점"),
@@ -127,8 +129,8 @@ def _score_option_blocks(
 ) -> list[dict[str, Any]]:
     blocks: list[dict[str, Any]] = []
     counts = stats["counts"]
-    total = stats["total_voters"]
     votes_by_score = stats.get("votes_by_score", {})
+    voter_profiles = stats.get("voter_profiles", {})
 
     for score in DESC_SCORES:
         icon, label = SCORE_LABELS[score]
@@ -146,8 +148,12 @@ def _score_option_blocks(
 
         count = counts.get(score, 0)
         voters = votes_by_score.get(score, [])
-        result_text = _option_result_text(count, voters)
-        blocks.append({"type": "context", "elements": [{"type": "mrkdwn", "text": result_text}]})
+        blocks.append(
+            {
+                "type": "context",
+                "elements": _option_context_elements(count, voters, voter_profiles),
+            }
+        )
 
     return blocks
 
@@ -187,17 +193,13 @@ def _score_table_blocks(stats: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _voters_text(stats: dict[str, Any]) -> str:
-    votes_by_score = stats.get("votes_by_score", {})
     lines = ["*투표자*"]
-    has_any = False
     for score in DESC_SCORES:
-        voters = votes_by_score.get(score, [])
-        if not voters:
+        count = stats["counts"].get(score, 0)
+        if count == 0:
             continue
-        has_any = True
-        mentions = ", ".join(f"<@{user_id}>" for user_id in voters)
-        lines.append(f"*{score}점* · {mentions}")
-    if not has_any:
+        lines.append(f"*{score}점* · {count}명")
+    if len(lines) == 1:
         lines.append("_아직 투표자가 없습니다._")
     return "\n".join(lines)
 
@@ -211,14 +213,37 @@ def _summary_text(stats: dict[str, Any]) -> str:
     )
 
 
-def _option_result_text(count: int, voters: list[str]) -> str:
+def _option_context_elements(
+    count: int,
+    voters: list[str],
+    voter_profiles: dict[str, dict[str, str]],
+) -> list[dict[str, Any]]:
     if count == 0:
-        return "투표 없음"
+        return [{"type": "mrkdwn", "text": "투표 없음"}]
 
-    voter_mentions = ", ".join(f"<@{user_id}>" for user_id in voters)
-    if voter_mentions:
-        return f"{voter_mentions} · {count}명"
-    return f"{count}명"
+    elements: list[dict[str, Any]] = []
+    for user_id in voters:
+        profile = voter_profiles.get(user_id) or {}
+        image_url = profile.get("image_url")
+        if not image_url:
+            continue
+        elements.append(
+            {
+                "type": "image",
+                "image_url": image_url,
+                "alt_text": profile.get("alt_text") or user_id,
+            }
+        )
+        if len(elements) >= MAX_CONTEXT_IMAGES:
+            break
+
+    hidden_count = max(0, count - len(elements))
+    if elements and hidden_count:
+        count_text = f"{count}명 · +{hidden_count}명"
+    else:
+        count_text = f"{count}명"
+    elements.append({"type": "plain_text", "emoji": True, "text": count_text})
+    return elements
 
 
 def format_vote_results(stats: dict[str, Any], markdown: bool = True) -> str:

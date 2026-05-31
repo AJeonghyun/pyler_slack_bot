@@ -34,6 +34,7 @@ class FakeSlackClient:
         self.posts: list[dict] = []
         self.updates: list[dict] = []
         self.ephemerals: list[dict] = []
+        self.user_info_calls: list[str] = []
 
     def chat_postMessage(self, **kwargs: dict) -> dict[str, str]:
         self.posts.append(kwargs)
@@ -46,6 +47,20 @@ class FakeSlackClient:
     def chat_postEphemeral(self, **kwargs: dict) -> dict[str, bool]:
         self.ephemerals.append(kwargs)
         return {"ok": True}
+
+    def users_info(self, user: str) -> dict:
+        self.user_info_calls.append(user)
+        return {
+            "ok": True,
+            "user": {
+                "id": user,
+                "name": user.lower(),
+                "profile": {
+                    "display_name": user,
+                    "image_24": f"https://example.com/{user}.png",
+                },
+            },
+        }
 
 
 class VoteDatabaseTest(unittest.TestCase):
@@ -111,13 +126,26 @@ class VoteDatabaseTest(unittest.TestCase):
         self.assertEqual(stats["votes_by_score"][4], ["U2"])
         self.assertEqual(stats["votes_by_score"][2], ["U3"])
 
-        voting_text = _all_text(build_vote_blocks(case, stats))
-        self.assertIn("<@U1>", voting_text)
-        self.assertIn("<@U2>", voting_text)
-        self.assertIn("<@U3>", voting_text)
+        stats_with_profiles = dict(stats)
+        stats_with_profiles["voter_profiles"] = {
+            user_id: {"image_url": f"https://example.com/{user_id}.png", "alt_text": user_id}
+            for user_id in ("U1", "U2", "U3")
+        }
+        blocks = build_vote_blocks(case, stats_with_profiles)
+        voting_text = _all_text(blocks)
+        image_urls = [
+            element["image_url"]
+            for block in blocks
+            for element in block.get("elements", [])
+            if element.get("type") == "image"
+        ]
+        self.assertNotIn("<@U1>", voting_text)
+        self.assertIn("https://example.com/U1.png", image_urls)
+        self.assertIn("https://example.com/U2.png", image_urls)
+        self.assertIn("https://example.com/U3.png", image_urls)
 
         close_text = _all_text(build_close_summary_blocks(stats))
-        self.assertIn("<@U1>", close_text)
+        self.assertNotIn("<@U1>", close_text)
         self.assertIn("투표가 마감되었습니다.", close_text)
 
 
@@ -196,6 +224,14 @@ class SlackHandlerTest(unittest.TestCase):
         self.assertEqual(stats["counts"][5], 1)
         self.assertEqual(stats["total_voters"], 1)
         self.assertEqual(len(self.client.updates), 3)
+        latest_blocks = self.client.updates[-1]["blocks"]
+        self.assertTrue(
+            any(
+                element.get("type") == "image" and element.get("image_url") == "https://example.com/U2.png"
+                for block in latest_blocks
+                for element in block.get("elements", [])
+            )
+        )
 
         self.app_module.handle_close_vote(
             lambda: acks.append("close"),
