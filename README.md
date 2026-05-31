@@ -28,10 +28,11 @@ reactions:read
 channels:history
 groups:history
 im:history
+mpim:history
 ```
 
 개인 DM에서 테스트하거나 사용하려면 `im:history`가 필요합니다. 그룹 DM까지 지원하려면
-추가로 `mpim:history`를 넣습니다.
+`mpim:history`가 필요합니다.
 
 ### Event Subscriptions
 
@@ -82,6 +83,35 @@ pip install -r requirements.txt
 python app.py
 ```
 
+## Docker 실행
+
+Oracle Cloud 같은 Linux VM에서는 Docker Compose 실행을 권장합니다.
+
+```bash
+cp .env.example .env
+# .env에 실제 Slack token 값을 입력한다.
+docker compose up -d --build
+docker compose logs -f
+```
+
+Docker Compose에서는 SQLite DB가 컨테이너 밖의 `./data/labeling_vote_bot.db`에 저장됩니다.
+
+## Oracle Cloud Always Free 배포
+
+Oracle Cloud Always Free VM에서 계속 실행하려면 [Oracle Cloud 배포 가이드](deploy/oracle-cloud-ubuntu.md)를 따릅니다.
+
+핵심 조건:
+
+```text
+Ubuntu VM 1대
+Docker + Docker Compose
+outbound 인터넷 연결
+DB 파일 보존용 디스크
+단일 컨테이너 실행
+```
+
+이 봇은 Slack Socket Mode 기반이라 공개 HTTP endpoint, HTTPS 인증서, inbound port가 필요 없습니다.
+
 ## 테스트
 
 Slack 토큰 없이 로컬 DB, Block Kit 생성, 핸들러 흐름을 검증할 수 있습니다.
@@ -119,9 +149,14 @@ python -m unittest tests.test_mvp
 
 ```text
 labeling-vote-bot/
+├── deploy/
+│   ├── labeling-vote-bot.service
+│   └── oracle-cloud-ubuntu.md
 ├── app.py
 ├── db.py
 ├── slack_blocks.py
+├── Dockerfile
+├── docker-compose.yml
 ├── requirements.txt
 ├── .env.example
 └── README.md

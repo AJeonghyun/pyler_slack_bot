@@ -20,7 +20,8 @@
         "reactions:read",
         "channels:history",
         "groups:history",
-        "im:history"
+        "im:history",
+        "mpim:history"
       ]
     }
   },

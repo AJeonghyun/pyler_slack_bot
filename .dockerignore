@@ -1,11 +1,11 @@
+.env
 .venv/
-.omx/
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.env
-data/
-logs/
 *.db
 *.sqlite
 *.sqlite3
+.git/
+.omx/
+data/
+bot.log

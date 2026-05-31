@@ -1,0 +1,11 @@
+services:
+  labeling-vote-bot:
+    build: .
+    container_name: labeling-vote-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_PATH: /data/labeling_vote_bot.db
+    volumes:
+      - ./data:/data
