@@ -94,7 +94,7 @@ docker compose up -d --build
 docker compose logs -f
 ```
 
-Docker Compose에서는 SQLite DB가 컨테이너 밖의 `./data/labeling_vote_bot.db`에 저장됩니다.
+Docker Compose에서는 SQLite DB가 Docker named volume `labeling-vote-data`의 `/data/labeling_vote_bot.db`에 저장됩니다.
 
 ## Oracle Cloud Always Free 배포
 

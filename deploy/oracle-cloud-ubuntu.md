@@ -109,12 +109,11 @@ docker compose down
 
 ## 9. 데이터 보존
 
-SQLite DB는 repo 내부 `data/labeling_vote_bot.db`에 저장됩니다.
-이 디렉터리는 컨테이너의 `/data`로 마운트됩니다.
+SQLite DB는 Docker named volume `labeling-vote-data`의 `/data/labeling_vote_bot.db`에 저장됩니다.
 
 간단 백업:
 
 ```bash
 mkdir -p ~/labeling-vote-bot-backups
-cp data/labeling_vote_bot.db ~/labeling-vote-bot-backups/labeling_vote_bot_$(date +%Y%m%d_%H%M%S).db
+sudo docker cp labeling-vote-bot:/data/labeling_vote_bot.db ~/labeling-vote-bot-backups/labeling_vote_bot_$(date +%Y%m%d_%H%M%S).db
 ```
