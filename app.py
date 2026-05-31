@@ -120,8 +120,22 @@ def handle_select_category(
 
         case = db.get_case(case_id)
         if not case:
-            logger.warning("Category action for unknown case_id=%s", case_id)
-            return
+            case = _recover_case_from_action_body(
+                case_id=case_id,
+                body=body,
+                status="categorizing",
+                user_id=user_id,
+            )
+            if not case:
+                _post_ephemeral_from_body(
+                    client,
+                    body,
+                    user_id,
+                    "이 투표 카드는 서버 재배포 전 카드라 처리할 수 없습니다. 새로 이모지를 달아 투표 카드를 다시 만들어주세요.",
+                )
+                logger.warning("Category action for unknown case_id=%s", case_id)
+                return
+            case_id = case["case_id"]
         if case["status"] == "closed":
             logger.info("Ignoring category action for closed case_id=%s", case_id)
             return
@@ -163,8 +177,22 @@ def handle_vote_score(ack: Any, body: dict[str, Any], action: dict[str, Any], cl
 
         case = db.get_case(case_id)
         if not case:
-            logger.warning("Vote action for unknown case_id=%s", case_id)
-            return
+            case = _recover_case_from_action_body(
+                case_id=case_id,
+                body=body,
+                status="voting",
+                user_id=user_id,
+            )
+            if not case:
+                _post_ephemeral_from_body(
+                    client,
+                    body,
+                    user_id,
+                    "이 투표 카드는 서버 재배포 전 카드라 처리할 수 없습니다. 새로 이모지를 달아 투표 카드를 다시 만들어주세요.",
+                )
+                logger.warning("Vote action for unknown case_id=%s", case_id)
+                return
+            case_id = case["case_id"]
         if case["status"] != "voting":
             logger.info("Ignoring vote for non-voting case_id=%s status=%s", case_id, case["status"])
             return
@@ -185,8 +213,26 @@ def handle_close_vote(ack: Any, body: dict[str, Any], action: dict[str, Any], cl
 
         case, newly_closed = db.close_case(case_id)
         if not case:
-            logger.warning("Close action for unknown case_id=%s", case_id)
-            return
+            recovered_case = _recover_case_from_action_body(
+                case_id=case_id,
+                body=body,
+                status="voting",
+                user_id=body["user"]["id"],
+            )
+            if not recovered_case:
+                _post_ephemeral_from_body(
+                    client,
+                    body,
+                    body["user"]["id"],
+                    "이 투표 카드는 서버 재배포 전 카드라 처리할 수 없습니다. 새로 이모지를 달아 투표 카드를 다시 만들어주세요.",
+                )
+                logger.warning("Close action for unknown case_id=%s", case_id)
+                return
+            case_id = recovered_case["case_id"]
+            case, newly_closed = db.close_case(case_id)
+            if not case:
+                logger.warning("Close action could not recover case_id=%s", case_id)
+                return
 
         stats = db.get_vote_stats(case_id)
         _update_vote_message(client, case_id, case=case, stats=stats)
@@ -229,6 +275,83 @@ def _post_ephemeral(client: Any, case: dict[str, Any], user_id: str, text: str) 
     try:
         client.chat_postEphemeral(
             channel=case["channel_id"],
+            user=user_id,
+            text=text,
+        )
+    except Exception:
+        logger.exception("Failed to post ephemeral message")
+
+
+def _recover_case_from_action_body(
+    *,
+    case_id: str,
+    body: dict[str, Any],
+    status: str,
+    user_id: str,
+) -> dict[str, Any] | None:
+    channel_id = _action_channel_id(body)
+    vote_message_ts = _action_message_ts(body)
+    root_ts = _action_root_ts(body)
+    if not channel_id or not vote_message_ts or not root_ts:
+        logger.warning(
+            "Cannot recover case_id=%s channel_id=%s root_ts=%s vote_message_ts=%s",
+            case_id,
+            channel_id,
+            root_ts,
+            vote_message_ts,
+        )
+        return None
+
+    case = db.recover_case_from_message(
+        case_id=case_id,
+        channel_id=channel_id,
+        root_ts=root_ts,
+        vote_message_ts=vote_message_ts,
+        status=status,
+        created_by=user_id,
+    )
+    logger.info(
+        "Recovered orphaned case_id=%s channel_id=%s root_ts=%s vote_message_ts=%s status=%s",
+        case["case_id"],
+        channel_id,
+        root_ts,
+        vote_message_ts,
+        status,
+    )
+    return case
+
+
+def _action_channel_id(body: dict[str, Any]) -> str | None:
+    channel = body.get("channel") or {}
+    container = body.get("container") or {}
+    return channel.get("id") or container.get("channel_id")
+
+
+def _action_message_ts(body: dict[str, Any]) -> str | None:
+    message = body.get("message") or {}
+    container = body.get("container") or {}
+    return container.get("message_ts") or message.get("ts")
+
+
+def _action_root_ts(body: dict[str, Any]) -> str | None:
+    message = body.get("message") or {}
+    container = body.get("container") or {}
+    return message.get("thread_ts") or container.get("thread_ts") or _action_message_ts(body)
+
+
+def _post_ephemeral_from_body(
+    client: Any,
+    body: dict[str, Any],
+    user_id: str,
+    text: str,
+) -> None:
+    channel_id = _action_channel_id(body)
+    if not channel_id:
+        logger.warning("Cannot post ephemeral without channel_id")
+        return
+    try:
+        client.chat_postEphemeral(
+            channel=channel_id,
             user=user_id,
             text=text,
         )

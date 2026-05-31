@@ -223,6 +223,44 @@ class SlackHandlerTest(unittest.TestCase):
         )
         self.assertEqual(self.app_module.db.get_vote_stats(case_id)["total_voters"], 1)
 
+    def test_orphaned_vote_card_is_recovered_from_action_body(self) -> None:
+        case_id = "CASE-20260531-0099"
+        body = {
+            "user": {"id": "U9"},
+            "channel": {"id": "C9"},
+            "container": {"channel_id": "C9", "message_ts": "999.002"},
+            "message": {"ts": "999.002", "thread_ts": "999.001"},
+        }
+        acks: list[str] = []
+
+        self.app_module.handle_vote_score(
+            lambda: acks.append("vote"),
+            body,
+            {"value": json.dumps({"case_id": case_id, "score": 4})},
+            self.client,
+        )
+
+        recovered = self.app_module.db.get_case(case_id)
+        self.assertEqual(acks, ["vote"])
+        self.assertIsNotNone(recovered)
+        self.assertEqual(recovered["channel_id"], "C9")
+        self.assertEqual(recovered["root_ts"], "999.001")
+        self.assertEqual(recovered["vote_message_ts"], "999.002")
+        self.assertEqual(recovered["status"], "voting")
+        self.assertEqual(self.app_module.db.get_vote_stats(case_id)["counts"][4], 1)
+        self.assertEqual(len(self.client.updates), 1)
+
+        self.app_module.handle_close_vote(
+            lambda: acks.append("close"),
+            body,
+            {"value": json.dumps({"case_id": case_id})},
+            self.client,
+        )
+
+        self.assertEqual(acks, ["vote", "close"])
+        self.assertEqual(self.app_module.db.get_case(case_id)["status"], "closed")
+        self.assertIn("투표가 마감되었습니다.", self.client.posts[-1]["text"])
+
 
 if __name__ == "__main__":
     unittest.main()

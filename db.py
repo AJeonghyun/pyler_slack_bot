@@ -118,6 +118,51 @@ class VoteDatabase:
                 (vote_message_ts, case_id),
             )
 
+    def recover_case_from_message(
+        self,
+        *,
+        case_id: str,
+        channel_id: str,
+        root_ts: str,
+        vote_message_ts: str,
+        status: str,
+        created_by: str | None,
+    ) -> dict[str, Any]:
+        if status not in {"categorizing", "voting", "closed"}:
+            raise ValueError("invalid case status")
+
+        with self.connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            existing = conn.execute(
+                "SELECT * FROM cases WHERE case_id = ?",
+                (case_id,),
+            ).fetchone()
+            if existing:
+                return dict(existing)
+
+            existing_thread = conn.execute(
+                "SELECT * FROM cases WHERE channel_id = ? AND root_ts = ?",
+                (channel_id, root_ts),
+            ).fetchone()
+            if existing_thread:
+                return dict(existing_thread)
+
+            conn.execute(
+                """
+                INSERT INTO cases (
+                    case_id, channel_id, root_ts, vote_message_ts, category, status,
+                    created_by, created_at, closed_at
+                )
+                VALUES (?, ?, ?, ?, NULL, ?, ?, ?, NULL)
+                """,
+                (case_id, channel_id, root_ts, vote_message_ts, status, created_by, utc_now()),
+            )
+            row = conn.execute(
+                "SELECT * FROM cases WHERE case_id = ?",
+                (case_id,),
+            ).fetchone()
+            return dict(row)
+
     def set_category(self, case_id: str, category: str) -> dict[str, Any] | None:
         with self.connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
