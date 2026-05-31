@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+import time
 from typing import Any
 
 from dotenv import load_dotenv
@@ -106,6 +107,7 @@ def handle_select_category(
     body: dict[str, Any],
     action: dict[str, Any],
     client: Any,
+    respond: Any = None,
 ) -> None:
     ack()
     try:
@@ -160,6 +162,7 @@ def handle_select_category(
             return
 
         stats = db.get_vote_stats(case_id)
+        _respond_ephemeral(respond, f"카테고리 *{category}* 선택을 저장했습니다. 투표 카드를 업데이트합니다.")
         _update_vote_message(client, case_id, case=updated_case, stats=stats)
         logger.info("Selected category case_id=%s category=%s", case_id, category)
     except Exception:
@@ -167,7 +170,13 @@ def handle_select_category(
 
 
 @app.action(re.compile(r"^vote_score_[0-5]$"))
-def handle_vote_score(ack: Any, body: dict[str, Any], action: dict[str, Any], client: Any) -> None:
+def handle_vote_score(
+    ack: Any,
+    body: dict[str, Any],
+    action: dict[str, Any],
+    client: Any,
+    respond: Any = None,
+) -> None:
     ack()
     try:
         payload = json.loads(action["value"])
@@ -198,6 +207,7 @@ def handle_vote_score(ack: Any, body: dict[str, Any], action: dict[str, Any], cl
             return
 
         db.upsert_vote(case_id=case_id, user_id=user_id, score=score)
+        _respond_ephemeral(respond, f"{score}점 투표를 저장했습니다. 결과를 업데이트합니다.")
         _update_vote_message(client, case_id)
         logger.info("Recorded vote case_id=%s user_id=%s score=%s", case_id, user_id, score)
     except Exception:
@@ -205,7 +215,13 @@ def handle_vote_score(ack: Any, body: dict[str, Any], action: dict[str, Any], cl
 
 
 @app.action("close_vote")
-def handle_close_vote(ack: Any, body: dict[str, Any], action: dict[str, Any], client: Any) -> None:
+def handle_close_vote(
+    ack: Any,
+    body: dict[str, Any],
+    action: dict[str, Any],
+    client: Any,
+    respond: Any = None,
+) -> None:
     ack()
     try:
         payload = json.loads(action["value"])
@@ -235,6 +251,8 @@ def handle_close_vote(ack: Any, body: dict[str, Any], action: dict[str, Any], cl
                 return
 
         stats = db.get_vote_stats(case_id)
+        if newly_closed:
+            _respond_ephemeral(respond, "투표 마감을 저장했습니다. 결과를 업데이트합니다.")
         _update_vote_message(client, case_id, case=case, stats=stats)
         if newly_closed:
             client.chat_postMessage(
@@ -263,12 +281,15 @@ def _update_vote_message(
         return
 
     stats = stats or db.get_vote_stats(case_id)
+    started_at = time.perf_counter()
     client.chat_update(
         channel=case["channel_id"],
         ts=case["vote_message_ts"],
         text=build_vote_fallback_text(case, stats),
         blocks=build_vote_blocks(case, stats),
     )
+    elapsed_ms = int((time.perf_counter() - started_at) * 1000)
+    logger.info("Updated vote message case_id=%s elapsed_ms=%s", case_id, elapsed_ms)
 
 
 def _post_ephemeral(client: Any, case: dict[str, Any], user_id: str, text: str) -> None:
@@ -280,6 +301,15 @@ def _post_ephemeral(client: Any, case: dict[str, Any], user_id: str, text: str) 
         )
     except Exception:
         logger.exception("Failed to post ephemeral message")
+
+
+def _respond_ephemeral(respond: Any, text: str) -> None:
+    if not respond:
+        return
+    try:
+        respond(text=text, response_type="ephemeral", replace_original=False)
+    except Exception:
+        logger.exception("Failed to send ephemeral response")
 
 
 def _recover_case_from_action_body(
