@@ -57,7 +57,7 @@ class FakeSlackClient:
                 "name": user.lower(),
                 "profile": {
                     "display_name": user,
-                    "image_24": f"https://example.com/{user}.png",
+                    "image_48": f"https://example.com/{user}.png",
                 },
             },
         }
@@ -109,9 +109,14 @@ class VoteDatabaseTest(unittest.TestCase):
         self.assertEqual(closed_case_again["status"], "closed")
 
         blocks = build_vote_blocks(closed_case, stats)
+        closed_text = _all_text(blocks)
         self.assertTrue(all(block.get("type") != "actions" for block in blocks))
+        self.assertNotIn("평균 점수", closed_text)
+        self.assertNotIn("최빈 점수", closed_text)
         self.assertIn("CASE-", build_vote_fallback_text(closed_case, stats))
         self.assertIn("투표가 마감되었습니다.", format_close_summary(stats))
+        self.assertNotIn("평균 점수", format_close_summary(stats))
+        self.assertNotIn("최빈 점수", format_close_summary(stats))
 
     def test_stats_track_who_voted_which_score(self) -> None:
         case, _ = self.db.create_case_if_absent("C2", "200.000", "U1")
@@ -147,6 +152,7 @@ class VoteDatabaseTest(unittest.TestCase):
         close_text = _all_text(build_close_summary_blocks(stats))
         self.assertNotIn("<@U1>", close_text)
         self.assertIn("투표가 마감되었습니다.", close_text)
+        self.assertNotIn("최종 점수별 결과", close_text)
 
 
 class SlackHandlerTest(unittest.TestCase):
