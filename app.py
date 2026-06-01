@@ -149,6 +149,9 @@ def handle_select_category(
             logger.info("Refreshed closed vote card from stale category action case_id=%s", case_id)
             return
         if case.get("created_by") and user_id != case["created_by"]:
+            if case["status"] == "voting":
+                stats = db.get_vote_stats(case_id)
+                _update_action_message_as_vote_card(client, body, case, stats)
             _post_ephemeral(
                 client,
                 case,
@@ -171,6 +174,7 @@ def handle_select_category(
         stats = db.get_vote_stats(case_id)
         _respond_ephemeral(respond, f"카테고리 *{category}* 선택을 저장했습니다. 투표 카드를 업데이트합니다.")
         _update_vote_message(client, case_id, case=updated_case, stats=stats)
+        _update_action_message_as_vote_card(client, body, updated_case, stats)
         logger.info("Selected category case_id=%s category=%s", case_id, category)
     except Exception:
         logger.exception("Failed to handle category action")

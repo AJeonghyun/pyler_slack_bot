@@ -367,6 +367,35 @@ class SlackHandlerTest(unittest.TestCase):
         self.assertEqual(self.app_module.db.get_case(case_id)["status"], "closed")
         self.assertIn("투표가 마감되었습니다.", self.client.posts[-1]["text"])
 
+    def test_stale_category_action_refreshes_clicked_message_while_voting(self) -> None:
+        case, _ = self.app_module.db.create_case_if_absent("C7", "777.001", "U7")
+        self.app_module.db.set_vote_message_ts(case["case_id"], "777.002")
+        self.app_module.db.set_category(case["case_id"], "선정")
+
+        body = {
+            "user": {"id": "U7"},
+            "channel": {"id": "C7"},
+            "container": {"channel_id": "C7", "message_ts": "stale.777"},
+            "message": {"ts": "stale.777", "thread_ts": "777.001"},
+        }
+        acks: list[str] = []
+
+        self.app_module.handle_select_category(
+            lambda: acks.append("category"),
+            body,
+            {"value": json.dumps({"case_id": case["case_id"], "category": "혐오"})},
+            self.client,
+        )
+
+        self.assertEqual(acks, ["category"])
+        self.assertEqual(self.app_module.db.get_case(case["case_id"])["category"], "혐오")
+        self.assertEqual(self.client.updates[-1]["ts"], "stale.777")
+        stale_text = _all_text(self.client.updates[-1]["blocks"])
+        self.assertIn(":five: *5점*", stale_text)
+        self.assertIn("○", stale_text)
+        self.assertNotIn(":large_green_square:", stale_text)
+        self.assertNotIn("투표 없음", stale_text)
+
 
 if __name__ == "__main__":
     unittest.main()
