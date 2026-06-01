@@ -8,6 +8,7 @@ import unittest
 
 from db import VoteDatabase
 from slack_blocks import (
+    CATEGORY_OPTIONS,
     build_close_summary_blocks,
     build_vote_blocks,
     build_vote_fallback_text,
@@ -27,6 +28,14 @@ def _all_text(blocks: list[dict]) -> str:
                 text = element.get("text", "")
                 parts.append(text if isinstance(text, str) else text.get("text", ""))
     return "\n".join(parts)
+
+
+def _score_ui_signature(blocks: list[dict]) -> list[str]:
+    return [
+        block["text"]["text"]
+        for block in blocks
+        if isinstance(block.get("text"), dict) and "점*" in block["text"].get("text", "")
+    ]
 
 
 class FakeSlackClient:
@@ -156,6 +165,39 @@ class VoteDatabaseTest(unittest.TestCase):
         self.assertNotIn("<@U1>", close_text)
         self.assertIn("투표가 마감되었습니다.", close_text)
         self.assertNotIn("최종 점수별 결과", close_text)
+
+    def test_vote_score_ui_is_identical_for_all_categories(self) -> None:
+        stats = {
+            "counts": {0: 0, 1: 1, 2: 0, 3: 2, 4: 1, 5: 4},
+            "votes_by_score": {score: [] for score in range(6)},
+            "total_voters": 8,
+            "average": 0.0,
+            "modes": [5],
+        }
+
+        signatures = []
+        for _, category in CATEGORY_OPTIONS:
+            case = {
+                "case_id": f"CASE-{category}",
+                "status": "closed",
+                "category": category,
+            }
+            blocks = build_vote_blocks(case, stats)
+            text = _all_text(blocks)
+
+            self.assertIn(":five: *5점*", text)
+            self.assertIn("●", text)
+            self.assertIn("○", text)
+            self.assertNotIn(":large_green_square:", text)
+            self.assertNotIn(":large_blue_square:", text)
+            self.assertNotIn(":large_yellow_square:", text)
+            self.assertNotIn(":large_orange_square:", text)
+            self.assertNotIn(":large_red_square:", text)
+            self.assertNotIn(":black_large_square:", text)
+            self.assertNotIn("투표 없음", text)
+            signatures.append(_score_ui_signature(blocks))
+
+        self.assertTrue(all(signature == signatures[0] for signature in signatures))
 
 
 class SlackHandlerTest(unittest.TestCase):
