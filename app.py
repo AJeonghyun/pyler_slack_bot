@@ -36,6 +36,11 @@ SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 SLACK_SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
 DB_PATH = os.getenv("DB_PATH", "./labeling_vote_bot.db")
 VOTE_TRIGGER_REACTION = os.getenv("VOTE_TRIGGER_REACTION", "ballot_box_with_ballot")
+VOTE_ADMIN_USER_IDS = {
+    user_id.strip()
+    for user_id in os.getenv("VOTE_ADMIN_USER_IDS", "").split(",")
+    if user_id.strip()
+}
 
 if not SLACK_BOT_TOKEN:
     raise RuntimeError("SLACK_BOT_TOKEN is required")
@@ -237,29 +242,46 @@ def handle_close_vote(
     try:
         payload = json.loads(action["value"])
         case_id = payload["case_id"]
+        user_id = body["user"]["id"]
 
-        case, newly_closed = db.close_case(case_id)
+        case = db.get_case(case_id)
         if not case:
-            recovered_case = _recover_case_from_action_body(
+            case = _recover_case_from_action_body(
                 case_id=case_id,
                 body=body,
                 status="voting",
-                user_id=body["user"]["id"],
+                user_id=user_id,
             )
-            if not recovered_case:
+            if not case:
                 _post_ephemeral_from_body(
                     client,
                     body,
-                    body["user"]["id"],
+                    user_id,
                     "이 투표 카드는 서버 재배포 전 카드라 처리할 수 없습니다. 새로 이모지를 달아 투표 카드를 다시 만들어주세요.",
                 )
                 logger.warning("Close action for unknown case_id=%s", case_id)
                 return
-            case_id = recovered_case["case_id"]
-            case, newly_closed = db.close_case(case_id)
-            if not case:
-                logger.warning("Close action could not recover case_id=%s", case_id)
-                return
+            case_id = case["case_id"]
+
+        if not _can_manage_case(user_id, case):
+            _post_ephemeral(
+                client,
+                case,
+                user_id,
+                "투표를 만든 사람 또는 관리자만 투표를 마감할 수 있습니다.",
+            )
+            logger.info(
+                "Ignoring unauthorized close action case_id=%s user_id=%s created_by=%s",
+                case_id,
+                user_id,
+                case.get("created_by"),
+            )
+            return
+
+        case, newly_closed = db.close_case(case_id)
+        if not case:
+            logger.warning("Close action could not find case_id=%s", case_id)
+            return
 
         stats = _enrich_stats_with_voter_profiles(client, db.get_vote_stats(case_id))
         if newly_closed:
@@ -272,9 +294,69 @@ def handle_close_vote(
                 text=format_close_summary(stats),
                 blocks=build_close_summary_blocks(stats),
             )
-        logger.info("Closed vote case_id=%s by user_id=%s", case_id, body["user"]["id"])
+        logger.info("Closed vote case_id=%s by user_id=%s", case_id, user_id)
     except Exception:
         logger.exception("Failed to handle close vote action")
+
+
+@app.action("reopen_vote")
+def handle_reopen_vote(
+    ack: Any,
+    body: dict[str, Any],
+    action: dict[str, Any],
+    client: Any,
+    respond: Any = None,
+) -> None:
+    ack()
+    try:
+        payload = json.loads(action["value"])
+        case_id = payload["case_id"]
+        user_id = body["user"]["id"]
+
+        case = db.get_case(case_id)
+        if not case:
+            _post_ephemeral_from_body(
+                client,
+                body,
+                user_id,
+                "이 투표 카드는 서버 재배포 전 카드라 처리할 수 없습니다. 새로 이모지를 달아 투표 카드를 다시 만들어주세요.",
+            )
+            logger.warning("Reopen action for unknown case_id=%s", case_id)
+            return
+
+        if not _can_manage_case(user_id, case):
+            _post_ephemeral(
+                client,
+                case,
+                user_id,
+                "투표를 만든 사람 또는 관리자만 투표를 다시 열 수 있습니다.",
+            )
+            logger.info(
+                "Ignoring unauthorized reopen action case_id=%s user_id=%s created_by=%s",
+                case_id,
+                user_id,
+                case.get("created_by"),
+            )
+            return
+
+        reopened_case, newly_reopened = db.reopen_case(case_id)
+        if not reopened_case:
+            logger.warning("Reopen action could not find case_id=%s", case_id)
+            return
+
+        stats = _enrich_stats_with_voter_profiles(client, db.get_vote_stats(case_id))
+        if newly_reopened:
+            _respond_ephemeral(respond, "투표를 다시 열었습니다.")
+        _update_vote_message(client, case_id, case=reopened_case, stats=stats)
+        if newly_reopened:
+            client.chat_postMessage(
+                channel=reopened_case["channel_id"],
+                thread_ts=reopened_case["root_ts"],
+                text="투표가 다시 열렸습니다.",
+            )
+        logger.info("Reopened vote case_id=%s by user_id=%s", case_id, user_id)
+    except Exception:
+        logger.exception("Failed to handle reopen vote action")
 
 
 def _update_vote_message(
@@ -301,6 +383,10 @@ def _update_vote_message(
     )
     elapsed_ms = int((time.perf_counter() - started_at) * 1000)
     logger.info("Updated vote message case_id=%s elapsed_ms=%s", case_id, elapsed_ms)
+
+
+def _can_manage_case(user_id: str, case: dict[str, Any]) -> bool:
+    return user_id == case.get("created_by") or user_id in VOTE_ADMIN_USER_IDS
 
 
 def _update_action_message_as_vote_card(

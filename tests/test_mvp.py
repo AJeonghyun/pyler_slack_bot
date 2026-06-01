@@ -111,15 +111,22 @@ class VoteDatabaseTest(unittest.TestCase):
 
         closed_case, newly_closed = self.db.close_case(case["case_id"])
         closed_case_again, newly_closed_again = self.db.close_case(case["case_id"])
+        reopened_case, newly_reopened = self.db.reopen_case(case["case_id"])
+        reopened_case_again, newly_reopened_again = self.db.reopen_case(case["case_id"])
 
         self.assertTrue(newly_closed)
         self.assertFalse(newly_closed_again)
         self.assertEqual(closed_case["status"], "closed")
         self.assertEqual(closed_case_again["status"], "closed")
+        self.assertTrue(newly_reopened)
+        self.assertFalse(newly_reopened_again)
+        self.assertEqual(reopened_case["status"], "voting")
+        self.assertEqual(reopened_case["closed_at"], None)
+        self.assertEqual(reopened_case_again["status"], "voting")
 
         blocks = build_vote_blocks(closed_case, stats)
         closed_text = _all_text(blocks)
-        self.assertTrue(all(block.get("type") != "actions" for block in blocks))
+        self.assertIn("투표 다시 열기", closed_text)
         self.assertNotIn("최종 투표 결과", closed_text)
         self.assertNotIn("평균 점수", closed_text)
         self.assertNotIn("최빈 점수", closed_text)
@@ -211,6 +218,7 @@ class SlackHandlerTest(unittest.TestCase):
         os.environ["SLACK_SIGNING_SECRET"] = "test"
         os.environ["DB_PATH"] = self.db_path
         os.environ["VOTE_TRIGGER_REACTION"] = "vote"
+        os.environ["VOTE_ADMIN_USER_IDS"] = ""
 
         import app
 
@@ -285,19 +293,28 @@ class SlackHandlerTest(unittest.TestCase):
         )
 
         self.app_module.handle_close_vote(
-            lambda: acks.append("close"),
+            lambda: acks.append("unauthorized_close"),
             {"user": {"id": "U3"}},
+            {"value": json.dumps({"case_id": case_id})},
+            self.client,
+        )
+        self.assertEqual(self.app_module.db.get_case(case_id)["status"], "voting")
+        self.assertEqual(self.client.ephemerals[-1]["user"], "U3")
+
+        self.app_module.handle_close_vote(
+            lambda: acks.append("close"),
+            {"user": {"id": "U1"}},
             {"value": json.dumps({"case_id": case_id})},
             self.client,
         )
         self.app_module.handle_close_vote(
             lambda: acks.append("close_again"),
-            {"user": {"id": "U3"}},
+            {"user": {"id": "U1"}},
             {"value": json.dumps({"case_id": case_id})},
             self.client,
         )
 
-        self.assertEqual(acks[-2:], ["close", "close_again"])
+        self.assertEqual(acks[-3:], ["unauthorized_close", "close", "close_again"])
         self.assertEqual(len(self.client.posts), 2)
         self.assertIn("투표가 마감되었습니다.", self.client.posts[-1]["text"])
         self.assertEqual(self.app_module.db.get_case(case_id)["status"], "closed")
@@ -328,6 +345,26 @@ class SlackHandlerTest(unittest.TestCase):
         self.assertIn(":five: *5점*", stale_text)
         self.assertNotIn(":large_green_square:", stale_text)
         self.assertNotIn("투표 없음", stale_text)
+
+        self.app_module.handle_reopen_vote(
+            lambda: acks.append("unauthorized_reopen"),
+            {"user": {"id": "U3"}},
+            {"value": json.dumps({"case_id": case_id})},
+            self.client,
+        )
+        self.assertEqual(self.app_module.db.get_case(case_id)["status"], "closed")
+
+        self.app_module.handle_reopen_vote(
+            lambda: acks.append("reopen"),
+            {"user": {"id": "U1"}},
+            {"value": json.dumps({"case_id": case_id})},
+            self.client,
+        )
+        reopened_case = self.app_module.db.get_case(case_id)
+        self.assertEqual(reopened_case["status"], "voting")
+        self.assertIsNone(reopened_case["closed_at"])
+        self.assertIn("투표가 다시 열렸습니다.", self.client.posts[-1]["text"])
+        self.assertIn("투표 마감", _all_text(self.client.updates[-1]["blocks"]))
 
     def test_orphaned_vote_card_is_recovered_from_action_body(self) -> None:
         case_id = "CASE-20260531-0099"

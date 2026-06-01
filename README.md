@@ -13,7 +13,8 @@ Python 기반 Slack Bot으로, 스크린샷이 올라온 메시지에 `:ballot_b
 - 0점부터 5점까지 Block Kit 버튼 투표
 - 사용자별 1개 투표 저장 및 재투표 시 수정
 - `chat.update`로 투표 결과 갱신
-- `투표 마감` 버튼으로 투표 종료 및 최종 결과 thread 댓글 작성
+- 투표 생성자 또는 관리자의 `투표 마감` 버튼으로 투표 종료 및 최종 결과 thread 댓글 작성
+- 마감된 투표를 `투표 다시 열기` 버튼으로 재오픈
 - SQLite 자동 테이블 생성
 
 ## Slack App 설정
@@ -73,9 +74,12 @@ SLACK_APP_TOKEN=xapp-...
 SLACK_SIGNING_SECRET=...
 DB_PATH=./labeling_vote_bot.db
 VOTE_TRIGGER_REACTION=ballot_box_with_ballot
+VOTE_ADMIN_USER_IDS=U12345678,U23456789
 ```
 
 토큰 값은 코드에 넣지 말고 환경변수로만 설정합니다.
+`VOTE_ADMIN_USER_IDS`는 선택값입니다. 비워두면 스크린샷 업로더만 투표 마감과 재오픈을 할 수 있습니다.
+여러 명에게 권한을 주려면 Slack user id를 쉼표로 구분해 입력합니다.
 
 ## 실행 방법
 
@@ -137,7 +141,8 @@ python -m unittest tests.test_mvp
 3. Bot이 thread에 투표 카드를 생성한다.
 4. 팀원들이 0~5점 버튼으로 투표한다.
 5. 의견은 같은 thread 댓글로 토론한다.
-6. 리뷰어가 투표 마감 버튼을 누른다.
+6. 스크린샷 업로더 또는 관리자가 투표 마감 버튼을 누른다.
+7. 잘못 마감했다면 스크린샷 업로더 또는 관리자가 투표 다시 열기 버튼을 누른다.
 ```
 
 ## 데이터베이스

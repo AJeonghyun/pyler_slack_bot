@@ -60,6 +60,8 @@ def build_vote_blocks(case: dict[str, Any], stats: dict[str, Any]) -> list[dict[
     blocks.append({"type": "divider"})
     if is_voting:
         blocks.append(_close_action_block(case["case_id"]))
+    elif status == "closed":
+        blocks.append(_reopen_action_block(case["case_id"]))
 
     return blocks
 
@@ -231,6 +233,20 @@ def _close_action_block(case_id: str) -> dict[str, Any]:
                 action_id="close_vote",
                 value={"case_id": case_id},
                 style="danger",
+            )
+        ],
+    }
+
+
+def _reopen_action_block(case_id: str) -> dict[str, Any]:
+    return {
+        "type": "actions",
+        "elements": [
+            _button(
+                text="투표 다시 열기",
+                action_id="reopen_vote",
+                value={"case_id": case_id},
+                style="primary",
             )
         ],
     }

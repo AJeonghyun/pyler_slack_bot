@@ -252,6 +252,33 @@ class VoteDatabase:
             ).fetchone()
             return (dict(row) if row else None), True
 
+    def reopen_case(self, case_id: str) -> tuple[dict[str, Any] | None, bool]:
+        with self.connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            existing = conn.execute(
+                "SELECT * FROM cases WHERE case_id = ?",
+                (case_id,),
+            ).fetchone()
+            if not existing:
+                return None, False
+            if existing["status"] != "closed":
+                return dict(existing), False
+
+            conn.execute(
+                """
+                UPDATE cases
+                SET status = 'voting',
+                    closed_at = NULL
+                WHERE case_id = ?
+                """,
+                (case_id,),
+            )
+            row = conn.execute(
+                "SELECT * FROM cases WHERE case_id = ?",
+                (case_id,),
+            ).fetchone()
+            return (dict(row) if row else None), True
+
     def get_vote_counts(self, case_id: str) -> dict[int, int]:
         with self.connect() as conn:
             rows = conn.execute(
