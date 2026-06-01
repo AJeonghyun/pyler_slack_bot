@@ -7,14 +7,15 @@ SCORE_RANGE = range(6)
 DESC_SCORES = list(range(5, -1, -1))
 MAX_CONTEXT_ELEMENTS = 10
 BAR_SEGMENTS = 8
-EMPTY_BAR_EMOJI = ":white_large_square:"
+FILLED_BAR_MARK = "●"
+EMPTY_BAR_MARK = "○"
 SCORE_LABELS = {
-    5: (":large_green_square:", "5점"),
-    4: (":large_blue_square:", "4점"),
-    3: (":large_yellow_square:", "3점"),
-    2: (":large_orange_square:", "2점"),
-    1: (":red_square:", "1점"),
-    0: (":black_large_square:", "0점"),
+    5: (":five:", "5점"),
+    4: (":four:", "4점"),
+    3: (":three:", "3점"),
+    2: (":two:", "2점"),
+    1: (":one:", "1점"),
+    0: (":zero:", "0점"),
 }
 CATEGORY_OPTIONS = [
     ("selection", "선정"),
@@ -191,15 +192,15 @@ def _option_context_elements(
 def _score_result_text(score: int, count: int, total: int) -> str:
     icon, label = SCORE_LABELS[score]
     percent = round(count / total * 100) if total else 0
-    count_text = "투표 없음" if count == 0 else f"*{count}명* · {percent}%"
-    return f"{icon} *{label}*\n{_score_bar(score, count, total)} {count_text}"
+    if count == 0:
+        return f"{icon} *{label}*\n{_score_bar(count, total)}"
+    return f"{icon} *{label}*\n{_score_bar(count, total)} *{count}명* · {percent}%"
 
 
-def _score_bar(score: int, count: int, total: int) -> str:
+def _score_bar(count: int, total: int) -> str:
     filled = round(count / total * BAR_SEGMENTS) if total else 0
     filled = max(0, min(BAR_SEGMENTS, filled))
-    fill_emoji = SCORE_LABELS[score][0]
-    return "".join([fill_emoji] * filled + [EMPTY_BAR_EMOJI] * (BAR_SEGMENTS - filled))
+    return "".join([FILLED_BAR_MARK] * filled + [EMPTY_BAR_MARK] * (BAR_SEGMENTS - filled))
 
 
 def format_vote_results(stats: dict[str, Any], markdown: bool = True) -> str:

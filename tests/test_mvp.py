@@ -145,6 +145,8 @@ class VoteDatabaseTest(unittest.TestCase):
             if element.get("type") == "image"
         ]
         self.assertNotIn("<@U1>", voting_text)
+        self.assertNotIn("투표 없음", voting_text)
+        self.assertIn(":five: *5점*", voting_text)
         self.assertIn("https://example.com/U1.png", image_urls)
         self.assertIn("https://example.com/U2.png", image_urls)
         self.assertIn("https://example.com/U3.png", image_urls)
