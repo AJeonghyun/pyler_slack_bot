@@ -344,9 +344,9 @@ def _fetch_user_profile(client: Any, user_id: str) -> dict[str, str] | None:
     user = response.get("user") or {}
     profile = user.get("profile") or {}
     image_url = (
-        profile.get("image_192")
+        profile.get("image_48")
         or profile.get("image_72")
-        or profile.get("image_48")
+        or profile.get("image_192")
         or profile.get("image_32")
         or profile.get("image_24")
     )

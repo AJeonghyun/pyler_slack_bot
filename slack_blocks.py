@@ -56,14 +56,6 @@ def build_vote_blocks(case: dict[str, Any], stats: dict[str, Any]) -> list[dict[
         {"type": "divider"},
     ]
 
-    if not is_voting:
-        blocks.append(
-            {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": "*최종 투표 결과입니다.*"},
-            }
-        )
-
     blocks.extend(_score_option_blocks(case["case_id"], stats, interactive=is_voting))
     blocks.append({"type": "divider"})
     if is_voting:

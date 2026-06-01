@@ -111,6 +111,7 @@ class VoteDatabaseTest(unittest.TestCase):
         blocks = build_vote_blocks(closed_case, stats)
         closed_text = _all_text(blocks)
         self.assertTrue(all(block.get("type") != "actions" for block in blocks))
+        self.assertNotIn("최종 투표 결과", closed_text)
         self.assertNotIn("평균 점수", closed_text)
         self.assertNotIn("최빈 점수", closed_text)
         self.assertIn("CASE-", build_vote_fallback_text(closed_case, stats))
