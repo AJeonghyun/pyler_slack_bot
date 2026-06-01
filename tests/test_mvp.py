@@ -310,6 +310,25 @@ class SlackHandlerTest(unittest.TestCase):
         )
         self.assertEqual(self.app_module.db.get_vote_stats(case_id)["total_voters"], 1)
 
+        self.app_module.handle_select_category(
+            lambda: acks.append("closed_category"),
+            {
+                "user": {"id": "U1"},
+                "channel": {"id": "C1"},
+                "container": {"channel_id": "C1", "message_ts": "stale.001"},
+                "message": {"ts": "stale.001", "thread_ts": "123.456"},
+            },
+            {"value": json.dumps({"case_id": case_id, "category": "폭력"})},
+            self.client,
+        )
+        self.assertEqual(self.app_module.db.get_case(case_id)["category"], "선정")
+        stale_update = self.client.updates[-1]
+        stale_text = _all_text(stale_update["blocks"])
+        self.assertEqual(stale_update["ts"], "stale.001")
+        self.assertIn(":five: *5점*", stale_text)
+        self.assertNotIn(":large_green_square:", stale_text)
+        self.assertNotIn("투표 없음", stale_text)
+
     def test_orphaned_vote_card_is_recovered_from_action_body(self) -> None:
         case_id = "CASE-20260531-0099"
         body = {

@@ -142,7 +142,11 @@ def handle_select_category(
                 return
             case_id = case["case_id"]
         if case["status"] == "closed":
-            logger.info("Ignoring category action for closed case_id=%s", case_id)
+            stats = db.get_vote_stats(case_id)
+            _respond_ephemeral(respond, "이미 마감된 투표입니다. 최신 투표 카드로 갱신합니다.")
+            _update_vote_message(client, case_id, case=case, stats=stats)
+            _update_action_message_as_vote_card(client, body, case, stats)
+            logger.info("Refreshed closed vote card from stale category action case_id=%s", case_id)
             return
         if case.get("created_by") and user_id != case["created_by"]:
             _post_ephemeral(
@@ -293,6 +297,38 @@ def _update_vote_message(
     )
     elapsed_ms = int((time.perf_counter() - started_at) * 1000)
     logger.info("Updated vote message case_id=%s elapsed_ms=%s", case_id, elapsed_ms)
+
+
+def _update_action_message_as_vote_card(
+    client: Any,
+    body: dict[str, Any],
+    case: dict[str, Any],
+    stats: dict[str, Any],
+) -> None:
+    channel_id = _action_channel_id(body)
+    message_ts = _action_message_ts(body)
+    if (
+        not channel_id
+        or not message_ts
+        or message_ts == case.get("vote_message_ts")
+    ):
+        return
+
+    stats = _enrich_stats_with_voter_profiles(client, stats)
+    try:
+        client.chat_update(
+            channel=channel_id,
+            ts=message_ts,
+            text=build_vote_fallback_text(case, stats),
+            blocks=build_vote_blocks(case, stats),
+        )
+        logger.info(
+            "Updated stale action message as vote card case_id=%s message_ts=%s",
+            case["case_id"],
+            message_ts,
+        )
+    except Exception:
+        logger.exception("Failed to update stale action message case_id=%s", case["case_id"])
 
 
 def _enrich_stats_with_voter_profiles(client: Any, stats: dict[str, Any]) -> dict[str, Any]:
